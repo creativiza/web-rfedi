@@ -1,7 +1,6 @@
 import { randomBytes, createHash } from "node:crypto";
 import { prisma } from "@/lib/db";
 
-const PROVIDER_ID = "link"; // must match ManualLinkProvider.id in auth.ts
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
@@ -61,11 +60,17 @@ export async function generateAccessLink({
   });
 
   const params = new URLSearchParams({
-    callbackUrl,
     token,
     email: normalizedEmail,
+    callbackUrl,
   });
-  const url = `${origin.replace(/\/$/, "")}/api/auth/callback/${PROVIDER_ID}?${params}`;
+  // Point to the interstitial page rather than the NextAuth callback
+  // directly. The interstitial is a static-looking HTML page that does NOT
+  // consume the token on a plain GET — only a real human click triggers
+  // the actual login. This prevents email/messenger link-preview bots
+  // (WhatsApp, Slack, iMessage, Outlook safe-links…) from burning the
+  // one-shot token before the user opens the link.
+  const url = `${origin.replace(/\/$/, "")}/login/confirm?${params}`;
 
   return { url, expiresAt: expires };
 }
