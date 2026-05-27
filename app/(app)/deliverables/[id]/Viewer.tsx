@@ -157,10 +157,6 @@ export function Viewer({
 
   const handleSaveResult = useCallback(
     (html: string) => {
-      if (isSaving) return;
-      setIsSaving(true);
-      setSaveError(null);
-      setSaveWarning(null);
       const fd = new FormData();
       fd.set("id", deliverable.id);
       fd.set("html", html);
@@ -187,7 +183,7 @@ export function Viewer({
         }
       });
     },
-    [deliverable.id, deliverable.documentVersion, isSaving, postToIframe, router],
+    [deliverable.id, deliverable.documentVersion, postToIframe, router],
   );
 
   // Listen for messages from iframe
