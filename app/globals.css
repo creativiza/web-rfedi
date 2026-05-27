@@ -1,26 +1,227 @@
 @import "tailwindcss";
 
+/* ============================================================
+   CREATIVIZA × RFEDI — Design tokens (single source of truth)
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand */
+  --color-primary: #e51568;
+  --color-primary-dark: #7b1247;
+  --color-primary-darker: #560d33;
+  --color-primary-light: #ff4d94;
+  --color-primary-ultralight: #ffe6f0;
+
+  /* Neutrals */
+  --color-white: #ffffff;
+  --color-black: #0a0a0a;
+  --color-gray-50: #f8fafc;
+  --color-gray-100: #f1f5f9;
+  --color-gray-150: #e9ecf0;
+  --color-gray-200: #e2e8f0;
+  --color-gray-300: #cbd5e1;
+  --color-gray-400: #94a3b8;
+  --color-gray-500: #64748b;
+  --color-gray-600: #475569;
+  --color-gray-700: #334155;
+  --color-gray-800: #1e293b;
+  --color-gray-900: #0f172a;
+
+  /* Tech / data accents */
+  --color-tech-navy: #0d1b2a;
+  --color-tech-navy-mid: #1b263b;
+  --color-tech-cyan: #00d4ff;
+  --color-tech-purple: #6b21a8;
+
+  /* States */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* Semantic roles */
+  --bg-default: var(--color-white);
+  --bg-muted: var(--color-gray-50);
+  --bg-dark: var(--color-gray-900);
+  --bg-navy: var(--color-tech-navy);
+  --fg-primary: var(--color-gray-900);
+  --fg-body: var(--color-gray-700);
+  --fg-muted: var(--color-gray-600);
+  --fg-subtle: var(--color-gray-500);
+  --fg-inverse: var(--color-white);
+  --accent: var(--color-primary);
+  --accent-hover: var(--color-primary-dark);
+  --border-card: var(--color-gray-150);
+  --border-input: var(--color-gray-200);
+
+  /* Gradients */
+  --gradient-brand: linear-gradient(135deg, #e51568 0%, #7b1247 100%);
+  --gradient-fusion: linear-gradient(135deg, #e51568 0%, #6b21a8 50%, #0d1b2a 100%);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.1);
+  --shadow-primary: 0 8px 24px rgba(229, 21, 104, 0.2);
+
+  /* Layout */
+  --container: 1200px;
+  --nav-height: 72px;
 }
+
+/* ============================================================
+   Map tokens → Tailwind v4 theme so we can use classes like
+   bg-primary, text-fg-primary, font-display, etc.
+   ============================================================ */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Colors */
+  --color-primary: var(--color-primary);
+  --color-primary-dark: var(--color-primary-dark);
+  --color-primary-light: var(--color-primary-light);
+  --color-primary-ultralight: var(--color-primary-ultralight);
+
+  --color-fg: var(--fg-primary);
+  --color-fg-body: var(--fg-body);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-fg-inverse: var(--fg-inverse);
+
+  --color-bg: var(--bg-default);
+  --color-bg-muted: var(--bg-muted);
+  --color-bg-dark: var(--bg-dark);
+  --color-bg-navy: var(--bg-navy);
+
+  --color-border-card: var(--border-card);
+  --color-border-input: var(--border-input);
+
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+  --color-info: var(--color-info);
+
+  /* Fonts (variables set by Next/font in layout.tsx) */
+  --font-display: var(--font-montserrat), "Helvetica Neue", Arial, sans-serif;
+  --font-body: var(--font-inter), "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-mono-jetbrains), "Fira Code", monospace;
+  --font-sans: var(--font-inter), "Helvetica Neue", Arial, sans-serif;
+
+  /* Radii */
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================================
+   Base
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  font-family: var(--font-inter), "Helvetica Neue", Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--fg-body);
+  background: var(--bg-default);
+}
+
+/* ============================================================
+   Semantic typography helpers
+   ============================================================ */
+
+.t-display {
+  font-family: var(--font-montserrat), Arial, sans-serif;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--fg-primary);
+}
+
+.t-h1 {
+  font-family: var(--font-montserrat), Arial, sans-serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--fg-primary);
+}
+
+.t-h2 {
+  font-family: var(--font-montserrat), Arial, sans-serif;
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  color: var(--fg-primary);
+}
+
+.t-h3 {
+  font-family: var(--font-montserrat), Arial, sans-serif;
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--fg-primary);
+}
+
+.t-lead {
+  font-size: clamp(1.125rem, 1.5vw, 1.25rem);
+  font-weight: 400;
+  color: var(--fg-muted);
+  line-height: 1.6;
+}
+
+.t-overline {
+  font-family: var(--font-inter), Arial, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.t-mono {
+  font-family: var(--font-mono-jetbrains), monospace;
+  font-size: 0.875rem;
+}
+
+.t-metric {
+  font-family: var(--font-montserrat), Arial, sans-serif;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--fg-primary);
+}
+
+.t-metric-label {
+  font-family: var(--font-mono-jetbrains), monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--fg-subtle);
+}
+
+.accent-word {
+  color: var(--color-primary);
+}
+
+/* ============================================================
+   Form / focus
+   ============================================================ */
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 6px;
 }

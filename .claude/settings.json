@@ -2,7 +2,17 @@
   "permissions": {
     "allow": [
       "Bash(grep -E \"\\\\.\\(html|json|js|css|config\\)$\")",
-      "Bash(npx create-next-app@latest . --typescript --tailwind --app --no-src-dir --import-alias \"@/*\" --use-npm --eslint --yes)"
+      "Bash(npx create-next-app@latest . --typescript --tailwind --app --no-src-dir --import-alias \"@/*\" --use-npm --eslint --yes)",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} | size=%{size_download}b | total=%{time_total}s\\\\n\" --max-time 30 http://localhost:3000/)",
+      "Bash(curl -s -L -o /tmp/rfedi-home.html -w \"FINAL HTTP %{http_code} | size=%{size_download}b | redirects=%{num_redirects}\\\\n\" --max-time 30 http://localhost:3000/)",
+      "Bash(npx prisma *)",
+      "Bash(cat > *)",
+      "Bash(ls /Users/albertosanchez/.claude/plans/ 2>/dev/null | head -5)",
+      "Read(//Users/albertosanchez/.claude/plans/**)"
+    ],
+    "additionalDirectories": [
+      "/tmp"
     ]
   }
 }

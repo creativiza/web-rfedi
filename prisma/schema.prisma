@@ -1,0 +1,173 @@
+// Prisma schema — RFEDI Delivery
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// =============================================================
+// Roles & enums
+// =============================================================
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+enum DeliverableStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum DeliverableType {
+  PROCESS_MAP
+  USER_JOURNEY
+  DAFO
+  ARCHITECTURE
+  PROTOTYPE
+  REPORT
+  OTHER
+}
+
+enum CommentCategory {
+  QUESTION
+  CHANGE
+  APPROVED
+  NOTE
+}
+
+enum CommentStatus {
+  OPEN
+  RESOLVED
+}
+
+enum AnchorKind {
+  SIDE
+  PINNED
+}
+
+// =============================================================
+// NextAuth v5 models (Prisma adapter)
+// =============================================================
+
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique
+  name          String?
+  image         String?
+  role          Role          @default(CLIENT)
+  emailVerified DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  comments      Comment[]
+  uploads       Deliverable[] @relation("UploadedBy")
+  replies       Comment[]     @relation("ReplyBy")
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+// =============================================================
+// Domain models
+// =============================================================
+
+model Deliverable {
+  id              String            @id @default(cuid())
+  title           String
+  slug            String            @unique
+  type            DeliverableType
+  description     String?
+  blobUrl         String
+  blobPathname    String
+  documentVersion Int               @default(1)
+  order           Int               @default(0)
+  status          DeliverableStatus @default(DRAFT)
+  uploadedById    String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  uploadedBy User      @relation("UploadedBy", fields: [uploadedById], references: [id])
+  comments   Comment[]
+
+  @@index([status, order])
+  @@index([type])
+}
+
+model Comment {
+  id              String          @id @default(cuid())
+  deliverableId   String
+  authorId        String
+  body            String
+  category        CommentCategory @default(NOTE)
+  status          CommentStatus   @default(OPEN)
+
+  // Anchor data
+  anchorKind      AnchorKind
+  selectorPath    String?
+  offsetXPct      Float?
+  offsetYPct      Float?
+  anchorText      String?
+  fallbackXPct    Float?
+  fallbackYPct    Float?
+  documentVersion Int?
+
+  // Admin inline reply (single, no threading)
+  reply      String?
+  replyById  String?
+  replyAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  deliverable Deliverable @relation(fields: [deliverableId], references: [id], onDelete: Cascade)
+  author      User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  replyBy     User?       @relation("ReplyBy", fields: [replyById], references: [id])
+
+  @@index([deliverableId, status])
+  @@index([authorId])
+}
