@@ -8,10 +8,14 @@ import { parse, HTMLElement } from "node-html-parser";
  * `allow-same-origin`), which already neutralizes most XSS risk against
  * the parent app. This pass strips the remaining tricky vectors:
  *   - <base> rewrites relative URLs inside the iframe (could break bridge)
- *   - <iframe>/<object>/<embed>/<applet> can frame third parties / leak
+ *   - <object>/<embed>/<applet>/<frame> can frame third parties / leak
  *   - <meta http-equiv="refresh"> causes navigation loops
  *   - inline event handlers (onclick, onerror, …) — replaced by <script> if needed
  *   - javascript: / data:text/html URLs in href/src/action
+ *
+ * Nested <iframe> is allowed only via `srcdoc` (inline content, no network):
+ * any `src` attribute is stripped, and a `sandbox` without `allow-same-origin`
+ * is forced. Used by index-style deliverables that embed sub-prototypes.
  *
  * <script> and <style> tags are kept on purpose: interactive prototypes
  * (process maps, user journeys) often rely on small JS for animations.
@@ -19,13 +23,14 @@ import { parse, HTMLElement } from "node-html-parser";
 
 const DANGEROUS_TAGS = new Set([
   "base",
-  "iframe",
   "object",
   "embed",
   "applet",
   "frame",
   "frameset",
 ]);
+
+const IFRAME_SAFE_SANDBOX = "allow-scripts";
 
 const URL_ATTRS = new Set(["href", "src", "action", "formaction"]);
 
@@ -48,6 +53,17 @@ function clean(node: HTMLElement): void {
     if (tag && DANGEROUS_TAGS.has(tag)) {
       child.remove();
       continue;
+    }
+
+    if (tag === "iframe") {
+      // Allow nested iframes only with `srcdoc` (inline). No external loads.
+      child.removeAttribute("src");
+      child.setAttribute("sandbox", IFRAME_SAFE_SANDBOX);
+      if (!child.getAttribute("srcdoc")) {
+        // No inline content → nothing to render, drop it.
+        child.remove();
+        continue;
+      }
     }
 
     if (tag === "meta") {
