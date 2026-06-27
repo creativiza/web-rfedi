@@ -56,14 +56,11 @@ function clean(node: HTMLElement): void {
     }
 
     if (tag === "iframe") {
-      // Allow nested iframes only with `srcdoc` (inline). No external loads.
+      // No external loads — strip `src` and force restrictive sandbox.
+      // `srcdoc` may be set at runtime from `data-srcdoc`, so don't require it
+      // at upload time. Without src + sandbox, the worst case is an empty frame.
       child.removeAttribute("src");
       child.setAttribute("sandbox", IFRAME_SAFE_SANDBOX);
-      if (!child.getAttribute("srcdoc")) {
-        // No inline content → nothing to render, drop it.
-        child.remove();
-        continue;
-      }
     }
 
     if (tag === "meta") {
